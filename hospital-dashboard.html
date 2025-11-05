@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Dashboard - MediCare</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f5f7fa;
+            --card-bg: white;
+            --text: #333;
+            --text-light: #666;
+            --input-bg: white;
+            --input-border: #e0e0e0;
+            --sidebar-bg: #1e293b;
+            --sidebar-hover: #334155;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --input-bg: #334155;
+            --input-border: #475569;
+            --sidebar-bg: #020617;
+            --sidebar-hover: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* CRITICAL: Dark mode input fix */
+        input, select, textarea {
+            background: var(--input-bg) !important;
+            color: var(--text) !important;
+            border: 2px solid var(--input-border);
+            padding: 12px 16px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--input-bg) !important;
+            color: var(--text) !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background: #334155 !important;
+            border-color: #475569 !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] input:focus,
+        [data-theme="dark"] select:focus,
+        [data-theme="dark"] textarea:focus {
+            background: #334155 !important;
+            border-color: var(--primary) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] input::placeholder,
+        [data-theme="dark"] textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            padding: 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .sidebar-header h2 {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .sidebar-header p {
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            padding: 8px 20px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            color: #cbd5e1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(102, 126, 234, 0.15);
+            color: white;
+            border-left-color: var(--primary);
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .theme-toggle-sidebar {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .theme-toggle-sidebar:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .logout-sidebar {
+            background: var(--danger);
+            color: white;
+        }
+
+        .logout-sidebar:hover {
+            background: #dc2626;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 24px;
+            width: calc(100% - 280px);
+        }
+
+        .top-bar {
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .alert-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .alert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: var(--danger);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .success-msg {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 600;
+            border-left: 4px solid var(--success);
+        }
+
+        .patient-result, .alert-item {
+            background: var(--bg);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--input-border);
+            transition: all 0.2s;
+        }
+
+        .patient-result:hover, .alert-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .patient-result h4 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .info-item {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .info-item strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .blood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .blood-card {
+            background: var(--bg);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--input-border);
+            transition: all 0.3s;
+        }
+
+        .blood-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .blood-card.critical {
+            border-color: var(--danger);
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            animation: pulse 2s infinite;
+        }
+
+        [data-theme="dark"] .blood-card.critical {
+            background: linear-gradient(135deg, #450a0a, #7f1d1d);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .blood-type {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .blood-units {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .blood-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blood-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .blood-input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 20px;
+            max-width: 540px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .close-modal {
+            background: var(--bg);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .close-modal:hover {
+            background: var(--input-border);
+            transform: rotate(90deg);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+                width: calc(100% - 240px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .blood-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🏥 <span id="hospitalNameSidebar">Hospital</span></h2>
+            <p>Medical Management Portal</p>
+        </div>
+        
+        <div class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Records</div>
+                <div class="nav-item active" onclick="navigate('patients')">
+                    <span class="icon">👥</span>
+                    <span>Patient Records</span>
+                </div>
+                <div class="nav-item" onclick="navigate('register')">
+                    <span class="icon">➕</span>
+                    <span>Register Patient</span>
+                </div>
+                <div class="nav-item" onclick="navigate('addVisit')">
+                    <span class="icon">📋</span>
+                    <span>Add Visit Record</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Inventory</div>
+                <div class="nav-item" onclick="navigate('blood')">
+                    <span class="icon">🩸</span>
+                    <span>Blood Bank</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Alerts</div>
+                <div class="nav-item" onclick="navigate('critical')">
+                    <span class="icon">⚠️</span>
+                    <span>Critical Alerts</span>
+                </div>
+                <div class="nav-item" onclick="navigate('emergency')">
+                    <span class="icon">🚨</span>
+                    <span>Emergency Alerts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="theme-toggle-sidebar" onclick="toggleTheme()">🌙 Toggle Theme</button>
+            <button class="logout-sidebar" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title" id="pageTitle">Patient Records</h1>
+            <button class="alert-btn" onclick="showEmergencyModal()">
+                <span>🚨</span>
+                <span>Send Emergency Alert</span>
+            </button>
+        </div>
+
+        <!-- PATIENTS SECTION -->
+        <div id="patientsSection" class="section active">
+            <div class="card">
+                <h3><span>🔍</span> Search Patient Records</h3>
+                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <input type="text" id="patientSearchId" placeholder="Enter Patient ID (e.g., PAT-XXXXX)">
+                    <button class="btn" onclick="searchPatient()">
+                        <span>🔍</span>
+                        <span>Search</span>
+                    </button>
+                </div>
+                <div id="patientResults"></div>
+            </div>
+        </div>
+
+        <!-- REGISTER PATIENT SECTION -->
+        <div id="registerSection" class="section">
+            <div class="card">
+                <h3><span>➕</span> Register New Patient</h3>
+                <div class="success-msg" id="regSuccess">✅ Patient registered successfully!</div>
+                <form id="registerPatientForm" onsubmit="handleRegisterPatient(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Full Name <span class="required">*</span></label>
+                            <input type="text" id="regName" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span class="required">*</span></label>
+                            <input type="email" id="regEmail" required placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth <span class="required">*</span></label>
+                            <input type="date" id="regDOB" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Group <span class="required">*</span></label>
+                            <select id="regBlood" required>
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Emergency Contact <span class="required">*</span></label>
+                            <input type="tel" id="regContact" required pattern="[0-9]{10}" placeholder="10-digit number">
+                        </div>
+                        <div class="form-group">
+                            <label>Address <span class="required">*</span></label>
+                            <input type="text" id="regAddress" required placeholder="123 Main Street, City">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span>➕</span>
+                        <span>Register Patient</span>
+                    </button>
+                </form>
+                <div id="generatedPatientId" style="display:none; margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; border-left: 4px solid var(--warning);">
+                    <strong style="color: #92400e;">Generated Patient ID:</strong><br>
+                    <span id="newPatientId" style="font-size: 20px; color: var(--primary); font-weight: 700; letter-spacing: 1px;"></span>
+                    <p style="margin-top: 8px; font-size: 13px; color: #92400e;">Patient can login with this ID, their name, and email. Default password: <strong>temp123</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD VISIT SECTION -->
+        <div id="addVisitSection" class="section">
+            <div class="card">
+                <h3><span>📋</span> Add Hospital Visit Record</h3>
+                <div class="success-msg" id="visitSuccess">✅ Visit record added successfully!</div>
+                <form id="addVisitForm" onsubmit="handleAddVisit(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Patient ID <span class="required">*</span></label>
+                            <input type="text" id="visitPatientId" required placeholder="PAT-XXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Doctor Name <span class="required">*</span></label>
+                            <input type="text" id="visitDoctor" required placeholder="Dr. Smith">
+                        </div>
+                        <div class="form-group">
+                            <label>Diagnosis <span class="required">*</span></label>
+                            <input type="text" id="visitDiagnosis" required placeholder="e.g., Viral Fever">
+                        </div>
+                        <div class="form-group">
+                            <label>Prescription <span class="required">*</span></label>
+                            <input type="text" id="visitPrescription" required placeholder="e.g., Paracetamol 500mg">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Lab Results</label>
+                            <textarea id="visitLab" placeholder="Enter lab test results (optional)"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Notes</label>
+                            <textarea id="visitNotes" placeholder="Any additional notes (optional)"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span>💾</span>
+                        <span>Save Visit Record</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- BLOOD BANK SECTION -->
+        <div id="bloodSection" class="section">
+            <div class="card">
+                <h3><span>🩸</span> Blood Bank Management</h3>
+                <p style="margin-bottom: 24px; color: var(--text-light);">Manage blood inventory. Critical alerts are automatically sent when units fall below 10.</p>
+                <div class="blood-grid" id="bloodGrid">
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Loading blood bank data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRITICAL ALERTS SECTION -->
+        <div id="criticalSection" class="section">
+            <div class="card">
+                <h3><span>⚠️</span> Critical Stock Alerts</h3>
+                <p style="margin-bottom: 24px; color: var(--text-light);">Hospitals with critically low blood stock (< 10 units)</p>
+                <div id="criticalAlerts">
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Loading critical alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMERGENCY ALERTS SECTION -->
+        <div id="emergencySection" class="section">
+            <div class="card">
+                <h3><span>🚨</span> Global Emergency Alerts</h3>
+                <p style="margin-bottom: 24px; color: var(--text-light);">Emergency alerts from all hospitals in the network</p>
+                <div id="emergencyAlerts">
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Loading emergency alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EMERGENCY MODAL -->
+    <div id="emergencyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🚨 Send Emergency Alert</h3>
+                <button class="close-modal" onclick="closeEmergencyModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>Emergency Message <span class="required">*</span></label>
+                <textarea id="emergencyMessage" rows="5" placeholder="Describe the emergency situation..." style="width: 100%;"></textarea>
+            </div>
+            <button class="btn btn-danger" onclick="sendEmergencyAlert()" style="width: 100%; margin-top: 16px;">
+                <span>📡</span>
+                <span>Broadcast to All Hospitals</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const socket = io('http://localhost:5000');
+        let hospitalData = null;
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        function navigate(section) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            const titles = {
+                patients: 'Patient Records',
+                register: 'Register New Patient',
+                addVisit: 'Add Visit Record',
+                blood: 'Blood Bank Management',
+                critical: 'Critical Stock Alerts',
+                emergency: 'Emergency Alerts'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[section];
+            document.getElementById(section + 'Section').classList.add('active');
+            
+            if (section === 'blood') loadBloodBank();
+            if (section === 'critical') loadCriticalAlerts();
+            if (section === 'emergency') loadEmergencyAlerts();
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            const dataStr = localStorage.getItem('hospitalData');
+            
+            if (!token || role !== 'hospital' || !dataStr) {
+                alert('Please login first!');
+                window.location.href = 'index.html';
+                return false;
+            }
+            
+            hospitalData = JSON.parse(dataStr);
+            document.getElementById('hospitalNameSidebar').textContent = hospitalData.hospitalName;
+            return true;
+        }
+
+        async function searchPatient() {
+            const patientId = document.getElementById('patientSearchId').value.trim();
+            if (!patientId) return alert('Enter Patient ID');
+            
+            const results = document.getElementById('patientResults');
+            results.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Searching...</p></div>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/patient/search/${patientId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const p = result.patient;
+                    const visits = result.visits;
+                    results.innerHTML = `
+                        <div class="patient-result">
+                            <h4>👤 ${p.name}</h4>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>ID:</strong> ${p.userId}</div>
+                                <div class="info-item"><strong>Email:</strong> ${p.email}</div>
+                                <div class="info-item"><strong>Blood:</strong> <span class="badge badge-danger">${p.bloodGroup}</span></div>
+                                <div class="info-item"><strong>DOB:</strong> ${new Date(p.dateOfBirth).toLocaleDateString()}</div>
+                                <div class="info-item"><strong>Contact:</strong> ${p.emergencyContact}</div>
+                                <div class="info-item"><strong>Address:</strong> ${p.address}</div>
+                            </div>
+                        </div>
+                        <h4 style="margin: 24px 0 16px; color: var(--text);">📋 Visit History (${visits.length})</h4>
+                        ${visits.length > 0 ? visits.map(v => `
+                            <div class="patient-result">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                    <div>
+                                        <strong style="color: var(--primary);">🏥 ${v.hospitalName}</strong>
+                                        <p style="color: var(--text-light); font-size: 13px; margin-top: 4px;">📅 ${new Date(v.visitDate).toLocaleDateString()} • 👨‍⚕️ ${v.doctorName}</p>
+                                    </div>
+                                </div>
+                                <div class="info-grid">
+                                    <div class="info-item"><strong>Diagnosis:</strong> ${v.diagnosis}</div>
+                                    <div class="info-item"><strong>Prescription:</strong> ${v.prescription}</div>
+                                    ${v.labResults ? `<div class="info-item"><strong>Lab Results:</strong> ${v.labResults}</div>` : ''}
+                                    ${v.notes ? `<div class="info-item"><strong>Notes:</strong> ${v.notes}</div>` : ''}
+                                </div>
+                            </div>
+                        `).join('') : '<div class="empty-state"><div class="icon">📋</div><p>No visit history found</p></div>'}
+                    `;
+                } else {
+                    results.innerHTML = `<div class="empty-state"><div class="icon">❌</div><p style="color: var(--danger);">${result.message}</p></div>`;
+                }
+            } catch (error) {
+                results.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p style="color: var(--danger);">Error searching patient</p></div>';
+            }
+        }
+
+        async function handleRegisterPatient(e) {
+            e.preventDefault();
+            
+            const data = {
+                name: document.getElementById('regName').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                dateOfBirth: document.getElementById('regDOB').value,
+                bloodGroup: document.getElementById('regBlood').value,
+                emergencyContact: document.getElementById('regContact').value.trim(),
+                address: document.getElementById('regAddress').value.trim(),
+                registeredBy: hospitalData.hospitalId
+            };
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/register/patient`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('regSuccess').style.display = 'block';
+                    document.getElementById('newPatientId').textContent = result.userId;
+                    document.getElementById('generatedPatientId').style.display = 'block';
+                    e.target.reset();
+                    setTimeout(() => {
+                        document.getElementById('regSuccess').style.display = 'none';
+                    }, 5000);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Error registering patient');
+            }
+        }
+
+        async function handleAddVisit(e) {
+            e.preventDefault();
+            
+            const data = {
+                userId: document.getElementById('visitPatientId').value.trim(),
+                hospitalId: hospitalData.hospitalId,
+                hospitalName: hospitalData.hospitalName,
+                diagnosis: document.getElementById('visitDiagnosis').value.trim(),
+                prescription: document.getElementById('visitPrescription').value.trim(),
+                labResults: document.getElementById('visitLab').value.trim(),
+                doctorName: document.getElementById('visitDoctor').value.trim(),
+                notes: document.getElementById('visitNotes').value.trim()
+            };
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/addVisit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('visitSuccess').style.display = 'block';
+                    e.target.reset();
+                    setTimeout(() => {
+                        document.getElementById('visitSuccess').style.display = 'none';
+                    }, 5000);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Error adding visit');
+            }
+        }
+
+        async function loadBloodBank() {
+            const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+            const grid = document.getElementById('bloodGrid');
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/blood/${hospitalData.hospitalId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                const data = result.success ? result.bloodData : [];
+                
+                grid.innerHTML = bloodTypes.map(type => {
+                    const record = data.find(b => b.bloodType === type);
+                    const units = record ? record.availableUnits : 0;
+                    const critical = units < 10;
+                    
+                    return `
+                        <div class="blood-card ${critical ? 'critical' : ''}">
+                            <div class="blood-type">${type}</div>
+                            <div class="blood-units">${units}</div>
+                            <div class="blood-label">${critical ? '⚠️ Critical Stock' : 'Units Available'}</div>
+                            <div class="blood-controls">
+                                <input type="number" class="blood-input" id="add-${type}" placeholder="+" min="1">
+                                <button class="btn btn-success btn-small" onclick="addBlood('${type}')">➕</button>
+                            </div>
+                            <div class="blood-controls">
+                                <input type="number" class="blood-input" id="remove-${type}" placeholder="-" min="1">
+                                <button class="btn btn-danger btn-small" onclick="removeBlood('${type}')">➖</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                grid.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p style="color: var(--danger);">Error loading blood bank</p></div>';
+            }
+        }
+
+        async function addBlood(type) {
+            const units = parseInt(document.getElementById(`add-${type}`).value);
+            if (!units || units <= 0) return alert('Enter valid units to add');
+            
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_URL}/blood/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ hospitalId: hospitalData.hospitalId, hospitalName: hospitalData.hospitalName, bloodType: type, units })
+                });
+                document.getElementById(`add-${type}`).value = '';
+                loadBloodBank();
+            } catch (error) {
+                alert('Error adding blood');
+            }
+        }
+
+        async function removeBlood(type) {
+            const units = parseInt(document.getElementById(`remove-${type}`).value);
+            if (!units || units <= 0) return alert('Enter valid units to remove');
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/blood/remove`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ hospitalId: hospitalData.hospitalId, hospitalName: hospitalData.hospitalName, bloodType: type, units })
+                });
+                const result = await response.json();
+                if (!result.success) return alert(result.message);
+                document.getElementById(`remove-${type}`).value = '';
+                loadBloodBank();
+            } catch (error) {
+                alert('Error removing blood');
+            }
+        }
+
+        async function loadCriticalAlerts() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/alerts/critical`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                const container = document.getElementById('criticalAlerts');
+                if (result.success && result.alerts.length > 0) {
+                    container.innerHTML = result.alerts.map(a => `
+                        <div class="alert-item" style="border-left: 4px solid var(--danger);">
+                            <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <h4 style="color: var(--danger);">⚠️ ${a.hospitalName}</h4>
+                                    <p style="margin-top: 4px; color: var(--text-light); font-size: 14px;">Blood Type: <strong style="color: var(--primary);">${a.bloodType}</strong></p>
+                                </div>
+                                <span class="badge badge-danger">Critical</span>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>Current Stock:</strong> ${a.currentUnits} units</div>
+                                <div class="info-item"><strong>Threshold:</strong> ${a.threshold} units</div>
+                                <div class="info-item"><strong>Date:</strong> ${new Date(a.createdAt).toLocaleDateString()}</div>
+                                <div class="info-item"><strong>Responses:</strong> ${a.acknowledgedBy.length}</div>
+                            </div>
+                            ${a.acknowledgedBy.length > 0 ? `
+                                <div style="margin-top: 16px; padding: 12px; background: var(--bg); border-radius: 8px;">
+                                    <strong style="font-size: 13px;">Hospital Responses:</strong>
+                                    ${a.acknowledgedBy.map(ack => `
+                                        <p style="margin-top: 8px; font-size: 13px; color: var(--text-light);">
+                                            <strong style="color: var(--success);">✓ ${ack.hospitalName}:</strong> ${ack.response || 'Acknowledged'}
+                                        </p>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            ${a.hospitalId !== hospitalData.hospitalId ? `
+                                <button class="btn btn-success" style="margin-top: 16px;" onclick="acknowledgeCritical('${a.alertId}')">
+                                    <span>🤝</span>
+                                    <span>Acknowledge & Offer Help</span>
+                                </button>
+                            ` : '<p style="margin-top: 16px; color: var(--warning); font-weight: 600;">📍 Your Hospital Alert</p>'}
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>No critical alerts at this time</p></div>';
+                }
+            } catch (error) {
+                document.getElementById('criticalAlerts').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p style="color: var(--danger);">Error loading alerts</p></div>';
+            }
+        }
+
+        async function acknowledgeCritical(alertId) {
+            const response = prompt('Enter your response/offer (e.g., "We can provide 15 units"):');
+            if (!response) return;
+            
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_URL}/alerts/critical/acknowledge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ alertId, hospitalId: hospitalData.hospitalId, hospitalName: hospitalData.hospitalName, response })
+                });
+                alert('✅ Alert acknowledged successfully!');
+                loadCriticalAlerts();
+            } catch (error) {
+                alert('Error acknowledging alert');
+            }
+        }
+
+        async function loadEmergencyAlerts() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/alerts/emergency`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                const container = document.getElementById('emergencyAlerts');
+                if (result.success && result.alerts.length > 0) {
+                    container.innerHTML = result.alerts.map(a => `
+                        <div class="alert-item" style="border-left: 4px solid var(--danger); background: linear-gradient(to right, rgba(239, 68, 68, 0.05), transparent);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <h4 style="color: var(--danger);">🚨 ${a.hospitalName}</h4>
+                                    <p style="margin-top: 4px; color: var(--text-light); font-size: 13px;">${new Date(a.createdAt).toLocaleString()}</p>
+                                </div>
+                                <span class="badge badge-danger">${a.priority.toUpperCase()}</span>
+                            </div>
+                            <p style="font-size: 16px; color: var(--text); margin: 16px 0; font-weight: 600;">${a.message}</p>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>Type:</strong> ${a.type}</div>
+                                <div class="info-item"><strong>Responses:</strong> ${a.acknowledgedBy.length}</div>
+                            </div>
+                            ${a.acknowledgedBy.length > 0 ? `
+                                <div style="margin-top: 16px; padding: 16px; background: var(--bg); border-radius: 8px;">
+                                    <strong style="font-size: 13px; color: var(--success);">✓ Hospital Responses (${a.acknowledgedBy.length}):</strong>
+                                    ${a.acknowledgedBy.map(ack => `
+                                        <div style="margin-top: 12px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--success);">
+                                            <p style="font-weight: 600; color: var(--primary); font-size: 14px;">${ack.hospitalName}</p>
+                                            <p style="margin-top: 6px; color: var(--text); font-size: 14px;">${ack.response}</p>
+                                            <p style="margin-top: 4px; font-size: 12px; color: var(--text-light);">${new Date(ack.timestamp).toLocaleString()}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            ${a.hospitalId !== hospitalData.hospitalId ? `
+                                <button class="btn" style="margin-top: 16px;" onclick="acknowledgeEmergency('${a.alertId}')">
+                                    <span>📨</span>
+                                    <span>Send Response</span>
+                                </button>
+                            ` : '<p style="margin-top: 16px; color: var(--warning); font-weight: 600;">📍 Your Emergency Alert</p>'}
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>No emergency alerts at this time</p></div>';
+                }
+            } catch (error) {
+                document.getElementById('emergencyAlerts').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p style="color: var(--danger);">Error loading alerts</p></div>';
+            }
+        }
+
+        async function acknowledgeEmergency(alertId) {
+            const response = prompt('Enter your response (e.g., "Sending ambulance with supplies"):');
+            if (!response) return;
+            
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_URL}/alerts/emergency/acknowledge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ alertId, hospitalId: hospitalData.hospitalId, hospitalName: hospitalData.hospitalName, response })
+                });
+                alert('✅ Response sent successfully!');
+                loadEmergencyAlerts();
+            } catch (error) {
+                alert('Error sending response');
+            }
+        }
+
+        function showEmergencyModal() {
+            document.getElementById('emergencyModal').classList.add('active');
+        }
+
+        function closeEmergencyModal() {
+            document.getElementById('emergencyModal').classList.remove('active');
+        }
+
+        async function sendEmergencyAlert() {
+            const message = document.getElementById('emergencyMessage').value.trim();
+            if (!message) return alert('Please enter an emergency message');
+            
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_URL}/alerts/emergency`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ 
+                        hospitalId: hospitalData.hospitalId, 
+                        hospitalName: hospitalData.hospitalName, 
+                        message, 
+                        type: 'emergency', 
+                        priority: 'high' 
+                    })
+                });
+                alert('🚨 Emergency alert sent to all hospitals!');
+                document.getElementById('emergencyMessage').value = '';
+                closeEmergencyModal();
+            } catch (error) {
+                alert('Error sending alert');
+            }
+        }
+
+        socket.on('criticalStock', (data) => {
+            if (data.hospitalId !== hospitalData.hospitalId) {
+                alert(`⚠️ Critical Stock Alert!\n\n${data.hospitalName} urgently needs ${data.bloodType}\nCurrent stock: ${data.currentUnits} units`);
+            }
+        });
+
+        socket.on('emergencyAlert', (data) => {
+            if (data.hospitalName !== hospitalData.hospitalName) {
+                alert(`🚨 EMERGENCY ALERT\n\nFrom: ${data.hospitalName}\n\n${data.message}\n\nPriority: ${data.priority.toUpperCase()}`);
+            }
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>

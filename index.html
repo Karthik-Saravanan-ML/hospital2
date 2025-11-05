@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare - Login & Registration</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-light: #f5f7fa;
+            --text-dark: #333;
+            --text-light: #666;
+            --input-bg: white;
+            --input-border: #e0e0e0;
+            --input-text: #333;
+        }
+
+        [data-theme="dark"] {
+            --bg-light: #1a1a2e;
+            --text-dark: #eee;
+            --text-light: #aaa;
+            --input-bg: #0f3460;
+            --input-border: #0f3460;
+            --input-text: #eee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            animation: slideUp 0.5s ease;
+        }
+
+        [data-theme="dark"] .container {
+            background: #16213e;
+            color: var(--text-dark);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        [data-theme="dark"] .tab-btn {
+            background: #0f3460;
+            color: #aaa;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .role-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        [data-theme="dark"] .role-btn {
+            background: #0f3460;
+            border-color: #0f3460;
+            color: #aaa;
+        }
+
+        .role-btn.active {
+            border-color: var(--primary);
+            background: #f0f4ff;
+            color: var(--primary);
+        }
+
+        [data-theme="dark"] .role-btn.active {
+            background: #1a2942;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* CRITICAL FIX: Dark mode inputs never turn white */
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background: var(--input-bg) !important;
+            color: var(--input-text) !important;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--input-bg) !important;
+            color: var(--input-text) !important;
+        }
+
+        input:active, select:active {
+            background: var(--input-bg) !important;
+            color: var(--input-text) !important;
+        }
+
+        input::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        /* Additional dark mode input fixes */
+        [data-theme="dark"] input,
+        [data-theme="dark"] select {
+            background: #0f3460 !important;
+            border-color: #0f3460 !important;
+            color: #eee !important;
+        }
+
+        [data-theme="dark"] input:focus,
+        [data-theme="dark"] select:focus {
+            background: #0f3460 !important;
+            border-color: var(--primary) !important;
+            color: #eee !important;
+        }
+
+        [data-theme="dark"] input:active,
+        [data-theme="dark"] select:active {
+            background: #0f3460 !important;
+            color: #eee !important;
+        }
+
+        [data-theme="dark"] input::placeholder {
+            color: #aaa;
+            opacity: 0.7;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .generated-id {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 15px;
+            display: none;
+            animation: slideUp 0.5s;
+        }
+
+        .generated-id h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .generated-id p {
+            color: #92400e;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .id-display {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 20px;
+            letter-spacing: 2px;
+            text-align: center;
+            border: 2px dashed var(--primary);
+            cursor: pointer;
+            user-select: all;
+        }
+
+        .copy-hint {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #92400e;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .logo h1 {
+                font-size: 28px;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <div class="container">
+        <div class="logo">
+            <h1>MediCare</h1>
+            <p>Smart Medical Health Management System</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+            <button class="tab-btn" onclick="switchTab('register')">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="role-tabs">
+                <button class="role-btn active" onclick="switchRole('patient', 'login')">👤 Patient</button>
+                <button class="role-btn" onclick="switchRole('hospital', 'login')">🏥 Hospital</button>
+            </div>
+
+            <form id="patientLoginForm" onsubmit="handlePatientLogin(event)">
+                <div class="form-group">
+                    <label for="loginPatientName">Full Name</label>
+                    <input type="text" id="loginPatientName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="loginPatientEmail">Email</label>
+                    <input type="email" id="loginPatientEmail" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPatientId">Patient ID</label>
+                    <input type="text" id="loginPatientId" placeholder="PAT-XXXXXXXXXX" required>
+                </div>
+                <button type="submit" class="submit-btn" id="patientLoginBtn">Login as Patient</button>
+            </form>
+
+            <form id="hospitalLoginForm" class="hidden" onsubmit="handleHospitalLogin(event)">
+                <div class="form-group">
+                    <label for="loginHospitalName">Hospital Name</label>
+                    <input type="text" id="loginHospitalName" required placeholder="Enter hospital name">
+                </div>
+                <div class="form-group">
+                    <label for="loginHospitalEmail">Email</label>
+                    <input type="email" id="loginHospitalEmail" required placeholder="Enter hospital email">
+                </div>
+                <div class="form-group">
+                    <label for="loginHospitalId">Hospital ID</label>
+                    <input type="text" id="loginHospitalId" placeholder="HOSP-XXXXXXXXXX" required>
+                </div>
+                <button type="submit" class="submit-btn" id="hospitalLoginBtn">Login as Hospital</button>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" class="hidden">
+            <div class="role-tabs">
+                <button class="role-btn active" onclick="switchRole('patient', 'register')">👤 Patient</button>
+                <button class="role-btn" onclick="switchRole('hospital', 'register')">🏥 Hospital</button>
+            </div>
+
+            <form id="patientRegisterForm" onsubmit="handlePatientRegister(event)">
+                <div class="form-group">
+                    <label for="regPatientName">Full Name *</label>
+                    <input type="text" id="regPatientName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="regPatientEmail">Email *</label>
+                    <input type="email" id="regPatientEmail" required placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="regPatientPassword">Password *</label>
+                    <input type="password" id="regPatientPassword" required placeholder="Minimum 6 characters" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="regPatientDOB">Date of Birth *</label>
+                    <input type="date" id="regPatientDOB" required max="2010-01-01">
+                </div>
+                <div class="form-group">
+                    <label for="regPatientBlood">Blood Group *</label>
+                    <select id="regPatientBlood" required>
+                        <option value="">Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="regPatientContact">Emergency Contact *</label>
+                    <input type="tel" id="regPatientContact" placeholder="10-digit number" required pattern="[0-9]{10}">
+                </div>
+                <div class="form-group">
+                    <label for="regPatientAddress">Address *</label>
+                    <input type="text" id="regPatientAddress" required placeholder="123 Main Street, City">
+                </div>
+                <button type="submit" class="submit-btn" id="patientRegBtn">Register Patient</button>
+            </form>
+
+            <form id="hospitalRegisterForm" class="hidden" onsubmit="handleHospitalRegister(event)">
+                <div class="form-group">
+                    <label for="regHospitalName">Hospital Name *</label>
+                    <input type="text" id="regHospitalName" required placeholder="City General Hospital">
+                </div>
+                <div class="form-group">
+                    <label for="regHospitalEmail">Email *</label>
+                    <input type="email" id="regHospitalEmail" required placeholder="hospital@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="regHospitalPassword">Password *</label>
+                    <input type="password" id="regHospitalPassword" required placeholder="Minimum 6 characters" minlength="6">
+                </div>
+                <button type="submit" class="submit-btn" id="hospitalRegBtn">Register Hospital</button>
+            </form>
+
+            <div class="generated-id" id="generatedIdBox">
+                <h3>Registration Successful!</h3>
+                <p>Your unique ID has been generated. <strong>Please save it for login:</strong></p>
+                <div class="id-display" id="generatedIdDisplay" onclick="copyToClipboard()">Click to copy</div>
+                <div class="copy-hint">Click on the ID to copy it</div>
+            </div>
+        </div>
+
+        <div class="message" id="messageBox"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+            
+            hideMessage();
+            document.getElementById('generatedIdBox').style.display = 'none';
+        }
+
+        function switchRole(role, formType) {
+            const buttons = event.target.parentElement.querySelectorAll('.role-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (formType === 'login') {
+                document.getElementById('patientLoginForm').classList.toggle('hidden', role !== 'patient');
+                document.getElementById('hospitalLoginForm').classList.toggle('hidden', role !== 'hospital');
+            } else {
+                document.getElementById('patientRegisterForm').classList.toggle('hidden', role !== 'patient');
+                document.getElementById('hospitalRegisterForm').classList.toggle('hidden', role !== 'hospital');
+            }
+
+            hideMessage();
+            document.getElementById('generatedIdBox').style.display = 'none';
+        }
+
+        function showMessage(message, type) {
+            const msgBox = document.getElementById('messageBox');
+            msgBox.textContent = message;
+            msgBox.className = `message ${type}`;
+            msgBox.style.display = 'block';
+
+            setTimeout(() => {
+                msgBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideMessage() {
+            document.getElementById('messageBox').style.display = 'none';
+        }
+
+        function setButtonLoading(buttonId, isLoading) {
+            const btn = document.getElementById(buttonId);
+            if (isLoading) {
+                btn.disabled = true;
+                btn.innerHTML += '<span class="loading"></span>';
+            } else {
+                btn.disabled = false;
+                const loading = btn.querySelector('.loading');
+                if (loading) loading.remove();
+            }
+        }
+
+        async function handlePatientRegister(e) {
+            e.preventDefault();
+            setButtonLoading('patientRegBtn', true);
+
+            const data = {
+                name: document.getElementById('regPatientName').value.trim(),
+                email: document.getElementById('regPatientEmail').value.trim(),
+                password: document.getElementById('regPatientPassword').value,
+                dateOfBirth: document.getElementById('regPatientDOB').value,
+                bloodGroup: document.getElementById('regPatientBlood').value,
+                emergencyContact: document.getElementById('regPatientContact').value.trim(),
+                address: document.getElementById('regPatientAddress').value.trim()
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/register/patient`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('generatedIdDisplay').textContent = result.userId;
+                    document.getElementById('generatedIdBox').style.display = 'block';
+                    e.target.reset();
+                    showMessage('Registration successful! Please save your ID.', 'success');
+                } else {
+                    showMessage(result.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Connection error. Please ensure the server is running.', 'error');
+            } finally {
+                setButtonLoading('patientRegBtn', false);
+            }
+        }
+
+        async function handleHospitalRegister(e) {
+            e.preventDefault();
+            setButtonLoading('hospitalRegBtn', true);
+
+            const data = {
+                hospitalName: document.getElementById('regHospitalName').value.trim(),
+                email: document.getElementById('regHospitalEmail').value.trim(),
+                password: document.getElementById('regHospitalPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/register/hospital`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('generatedIdDisplay').textContent = result.hospitalId;
+                    document.getElementById('generatedIdBox').style.display = 'block';
+                    e.target.reset();
+                    showMessage('Registration successful! Please save your ID.', 'success');
+                } else {
+                    showMessage(result.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Connection error. Please ensure the server is running.', 'error');
+            } finally {
+                setButtonLoading('hospitalRegBtn', false);
+            }
+        }
+
+        async function handlePatientLogin(e) {
+            e.preventDefault();
+            setButtonLoading('patientLoginBtn', true);
+
+            const data = {
+                name: document.getElementById('loginPatientName').value.trim(),
+                email: document.getElementById('loginPatientEmail').value.trim(),
+                userId: document.getElementById('loginPatientId').value.trim()
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/login/patient`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('userRole', 'patient');
+                    localStorage.setItem('userData', JSON.stringify(result.user));
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'patient-dashboard.html';
+                    }, 1000);
+                } else {
+                    showMessage(result.message || 'Login failed', 'error');
+                    setButtonLoading('patientLoginBtn', false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Connection error. Please ensure the server is running.', 'error');
+                setButtonLoading('patientLoginBtn', false);
+            }
+        }
+
+        async function handleHospitalLogin(e) {
+            e.preventDefault();
+            setButtonLoading('hospitalLoginBtn', true);
+
+            const data = {
+                hospitalName: document.getElementById('loginHospitalName').value.trim(),
+                email: document.getElementById('loginHospitalEmail').value.trim(),
+                hospitalId: document.getElementById('loginHospitalId').value.trim()
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/login/hospital`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('userRole', 'hospital');
+                    localStorage.setItem('hospitalData', JSON.stringify(result.hospital));
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'hospital-dashboard.html';
+                    }, 1000);
+                } else {
+                    showMessage(result.message || 'Login failed', 'error');
+                    setButtonLoading('hospitalLoginBtn', false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Connection error. Please ensure the server is running.', 'error');
+                setButtonLoading('hospitalLoginBtn', false);
+            }
+        }
+
+        function copyToClipboard() {
+            const idText = document.getElementById('generatedIdDisplay').textContent;
+            navigator.clipboard.writeText(idText).then(() => {
+                const originalText = document.getElementById('generatedIdDisplay').textContent;
+                document.getElementById('generatedIdDisplay').textContent = '✓ Copied!';
+                setTimeout(() => {
+                    document.getElementById('generatedIdDisplay').textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
