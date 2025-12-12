@@ -364,8 +364,18 @@ app.post('/api/alerts/emergency/acknowledge', authenticateToken, async (req, res
   }
 });
 
-// CHATBOT - COMPLETELY FIXED VERSION
+// CHATBOT - COMPLETELY FIXED VERSION WITH FULL LOGGING
 const chatCache = new Map();
+
+// Function to log complete AI responses
+function logAIResponse(response, cached = false, fallback = false) {
+  console.log('\n' + '='.repeat(80));
+  console.log(`🤖 AI Response ${cached ? '(CACHED)' : fallback ? '(FALLBACK)' : '(FRESH)'}:`);
+  console.log('='.repeat(80));
+  console.log(response);
+  console.log(`Length: ${response.length} characters`);
+  console.log('='.repeat(80) + '\n');
+}
 
 app.post('/api/chatbot', authenticateToken, async (req, res) => {
   try {
@@ -379,19 +389,22 @@ app.post('/api/chatbot', authenticateToken, async (req, res) => {
     const cacheKey = message.toLowerCase().trim();
     if (chatCache.has(cacheKey)) {
       console.log('💾 Returning cached response');
-      return res.json({ success: true, response: chatCache.get(cacheKey), cached: true });
+      const cachedResponse = chatCache.get(cacheKey);
+      logAIResponse(cachedResponse, true, false);
+      return res.json({ success: true, response: cachedResponse, cached: true });
     }
 
     if (!GOOGLE_AI_API_KEY) {
       console.log('⚠️ No API key found, using fallback');
       const fallback = getFallbackResponse(message);
+      logAIResponse(fallback, false, true);
       return res.json({ success: true, response: fallback, fallback: true });
     }
 
     console.log('🤖 Calling Google AI API...');
     
     // Correct Gemini API endpoint (v1beta)
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_AI_API_KEY}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_AI_API_KEY}`;
     
     const requestBody = {
       contents: [{
@@ -401,7 +414,7 @@ app.post('/api/chatbot', authenticateToken, async (req, res) => {
       }],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 200,
+        maxOutputTokens: 500, // Increased for longer responses
         topP: 0.8,
         topK: 40
       }
@@ -424,6 +437,7 @@ app.post('/api/chatbot', authenticateToken, async (req, res) => {
     if (response.status !== 200) {
       console.error('❌ API Error:', response.status, response.data);
       const fallback = getFallbackResponse(message);
+      logAIResponse(fallback, false, true);
       return res.json({ success: true, response: fallback, fallback: true, error: response.data });
     }
 
@@ -432,10 +446,12 @@ app.post('/api/chatbot', authenticateToken, async (req, res) => {
     if (!aiResponse) {
       console.error('❌ No response text in API response:', JSON.stringify(response.data));
       const fallback = getFallbackResponse(message);
+      logAIResponse(fallback, false, true);
       return res.json({ success: true, response: fallback, fallback: true });
     }
 
-    console.log('✅ AI Response received:', aiResponse.substring(0, 100) + '...');
+    // Log the complete AI response
+    logAIResponse(aiResponse, false, false);
     
     // Cache the response
     if (chatCache.size > 100) {
@@ -453,6 +469,7 @@ app.post('/api/chatbot', authenticateToken, async (req, res) => {
     console.error('Error Status:', error.response?.status);
     
     const fallback = getFallbackResponse(req.body.message);
+    logAIResponse(fallback, false, true);
     res.json({ 
       success: true, 
       response: fallback, 
@@ -535,11 +552,11 @@ app.get('/api/test-ai', async (req, res) => {
     }
 
     // WORKING ENDPOINT - gemini-pro with v1beta
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${GOOGLE_AI_API_KEY}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_AI_API_KEY}`;
     
     const testResponse = await axios.post(apiUrl, {
       contents: [{
-        parts: [{ text: 'Say hello in one sentence' }]
+        parts: [{ text: 'Say hello in one sentence and give me a detailed health tip about stress management' }]
       }]
     }, {
       timeout: 10000,
@@ -548,14 +565,20 @@ app.get('/api/test-ai', async (req, res) => {
 
     const aiText = testResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
+    // Log complete test response
+    console.log('\n🔬 Test AI Response:');
+    console.log('='.repeat(60));
+    console.log(aiText);
+    console.log('='.repeat(60));
+
     res.json({
       success: true,
       message: '✅ Google AI API is working perfectly!',
       apiResponse: aiText,
       status: testResponse.status,
-      model: 'gemini-pro',
+      model: 'gemini-2.5-flash',
       endpoint: 'v1beta (stable model)',
-      note: 'Using gemini-pro - the most reliable model'
+      responseLength: aiText?.length || 0
     });
     
   } catch (error) {
@@ -583,6 +606,42 @@ app.get('/api/test-ai', async (req, res) => {
   }
 });
 
+// DEBUG ENDPOINT - View full chat response
+app.get('/api/debug/chat', async (req, res) => {
+  try {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_AI_API_KEY}`;
+    
+    const testResponse = await axios.post(apiUrl, {
+      contents: [{
+        parts: [{ text: 'Give me a detailed 5-sentence response about stress management and meditation techniques' }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 500
+      }
+    }, {
+      timeout: 10000,
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const aiText = testResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    res.json({
+      success: true,
+      response: aiText,
+      length: aiText?.length,
+      fullResponse: testResponse.data
+    });
+    
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message,
+      details: error.response?.data
+    });
+  }
+});
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
@@ -591,11 +650,12 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`
-╔════════════════════════════════════════╗
-║  🏥 Medical System Server             ║
-║  ✅ Port: ${PORT}                         ║
-║  📊 MongoDB: Connected                ║
-║  🤖 AI: Enabled                       ║
-╚════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║  🏥 Medical System Server                                        ║
+║  ✅ Port: ${PORT}                                                 ║
+║  📊 MongoDB: Connected                                           ║
+║  🤖 AI: Enabled                                                  ║
+║  🔑 API Key: ${GOOGLE_AI_API_KEY ? 'CONFIGURED' : 'NOT SET'}                       ║
+╚══════════════════════════════════════════════════════════════════╝
   `);
 });

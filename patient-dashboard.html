@@ -213,6 +213,9 @@
             background: var(--bg);
             border-radius: 10px;
             margin-bottom: 15px;
+            /* Ensure long text wraps properly */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .message {
@@ -221,6 +224,10 @@
             border-radius: 10px;
             max-width: 80%;
             animation: fadeIn 0.3s;
+            /* Ensure text doesn't overflow */
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap; /* This preserves line breaks */
         }
 
         @keyframes fadeIn {
@@ -232,6 +239,8 @@
             background: var(--primary);
             color: white;
             margin-right: auto;
+            max-height: 400px; /* Limit height */
+            overflow-y: auto; /* Add scroll if needed */
         }
 
         .message.user {
@@ -301,6 +310,46 @@
             color: var(--text-light);
         }
 
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+
+        .response-info {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
         @media (max-width: 1024px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -319,6 +368,10 @@
             .navbar-right {
                 flex-direction: column;
                 gap: 8px;
+            }
+
+            .message {
+                max-width: 90%;
             }
         }
     </style>
@@ -389,14 +442,16 @@
                 <div class="chatbot-container">
                     <div class="chat-messages" id="chatMessages">
                         <div class="message bot">
-                            Hello! I'm your AI Health Assistant. I can help you with diet suggestions, health tips, and answer basic health questions. How can I help you today?
+                            🤖 Hello! I'm your AI Health Assistant. I can help you with diet suggestions, health tips, and answer basic health questions. How can I help you today?
+                            <div class="response-info">Type your health question below...</div>
                         </div>
                     </div>
                     <div class="chat-input-container">
-                        <input type="text" class="chat-input" id="chatInput" placeholder="Type your health question...">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Type your health question... (e.g., 'How to manage stress?', 'Healthy diet tips')">
                         <button class="send-btn" onclick="sendMessage()">Send</button>
                     </div>
                 </div>
+                <button style="margin-top: 10px; background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;" onclick="testAPIConnection()">🔧 Test API Connection</button>
             </div>
         </div>
     </div>
@@ -606,7 +661,14 @@ MediCare Health Management System
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message bot';
             typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = '🤖 <span style="animation: blink 1.4s infinite;">●</span> <span style="animation: blink 1.4s infinite 0.2s;">●</span> <span style="animation: blink 1.4s infinite 0.4s;">●</span>';
+            typingDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <span style="margin-left: 10px;">AI is thinking...</span>
+                </div>
+            `;
             chatMessages.appendChild(typingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -628,6 +690,8 @@ MediCare Health Management System
                 
                 const result = await response.json();
                 console.log('📦 API Result:', result);
+                console.log('Full response text:', result.response);
+                console.log('Response length:', result.response?.length);
                 
                 // Remove typing indicator
                 const typing = document.getElementById('typingIndicator');
@@ -639,19 +703,29 @@ MediCare Health Management System
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
                         .replace(/\n/g, '<br>');  // Line breaks
                     
-                    // Determine icon
+                    // Determine icon and info
                     let icon = '🤖';
-                    if (result.cached) icon = '💾';
-                    if (result.fallback) icon = '🩺';
+                    let infoText = 'AI Response';
+                    if (result.cached) {
+                        icon = '💾';
+                        infoText = 'Cached Response';
+                    }
+                    if (result.fallback) {
+                        icon = '🩺';
+                        infoText = 'Fallback Response';
+                    }
                     
                     const botMsg = document.createElement('div');
                     botMsg.className = 'message bot';
-                    botMsg.innerHTML = `${icon} ${formattedResponse}`;
+                    botMsg.innerHTML = `
+                        ${icon} ${formattedResponse}
+                        <div class="response-info">${infoText} • ${result.response?.length || 0} characters</div>
+                    `;
                     chatMessages.appendChild(botMsg);
                     
                     // Log if using fallback
                     if (result.fallback) {
-                        console.log('⚠️ Using fallback response. Reason:', result.error || result.details || 'API unavailable');
+                        console.warn('⚠️ Using fallback response. Reason:', result.error || result.details || 'API unavailable');
                     }
                 } else {
                     throw new Error('No response from API');
@@ -664,7 +738,8 @@ MediCare Health Management System
                 
                 const errorMsg = document.createElement('div');
                 errorMsg.className = 'message bot';
-                errorMsg.innerHTML = `🩺 I'm here to help! I can provide advice on:<br><br>
+                errorMsg.innerHTML = `
+                    🩺 I'm here to help! I can provide advice on:<br><br>
                     • 🥗 Diet & Nutrition<br>
                     • 💪 Exercise & Fitness<br>
                     • 🩺 Diabetes Management<br>
@@ -672,22 +747,39 @@ MediCare Health Management System
                     • 😴 Sleep & Rest<br>
                     • 🧘 Stress Management<br>
                     • ⚖️ Weight Management<br><br>
-                    <em>Ask me about any of these topics!</em>`;
+                    <em>Ask me about any of these topics!</em>
+                    <div class="response-info">Connection error - using fallback responses</div>
+                `;
                 chatMessages.appendChild(errorMsg);
             }
 
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
-        // Test API Connection Button (add to dashboard for debugging)
+        // Test API Connection
         async function testAPIConnection() {
             try {
                 const response = await fetch('http://localhost:5000/api/test-ai');
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert('✅ Google AI API is working!\n\n' + result.apiResponse);
+                    alert(`✅ Google AI API is working!\n\nResponse: ${result.apiResponse?.substring(0, 200)}...\n\nLength: ${result.responseLength} characters\nStatus: ${result.status}\nModel: ${result.model}`);
                     console.log('API Test Result:', result);
+                    
+                    // Show the response in chat
+                    const chatMessages = document.getElementById('chatMessages');
+                    const testMsg = document.createElement('div');
+                    testMsg.className = 'message bot';
+                    testMsg.innerHTML = `
+                        🔧 API Test Successful!<br><br>
+                        <strong>Model:</strong> ${result.model}<br>
+                        <strong>Status:</strong> ${result.status}<br>
+                        <strong>Response Length:</strong> ${result.responseLength} characters<br><br>
+                        <strong>Sample Response:</strong><br>
+                        ${result.apiResponse?.substring(0, 150)}...
+                    `;
+                    chatMessages.appendChild(testMsg);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 } else {
                     alert('❌ API connection failed\n\n' + result.message + '\n\nCheck console for details');
                     console.error('API Test Failed:', result);
@@ -696,14 +788,6 @@ MediCare Health Management System
                 alert('❌ Cannot connect to server\n\nMake sure server is running on port 5000');
                 console.error('Test Error:', error);
             }
-        }
-        
-        // Add blink animation for typing indicator
-        if (!document.getElementById('chatbot-styles')) {
-            const style = document.createElement('style');
-            style.id = 'chatbot-styles';
-            style.textContent = '@keyframes blink { 0%, 50%, 100% { opacity: 0.3; } 25% { opacity: 1; } }';
-            document.head.appendChild(style);
         }
 
         document.getElementById('chatInput').addEventListener('keypress', function(e) {
@@ -722,6 +806,19 @@ MediCare Health Management System
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             checkAuth();
+            
+            // Add typing animation styles
+            if (!document.getElementById('chatbot-animation')) {
+                const style = document.createElement('style');
+                style.id = 'chatbot-animation';
+                style.textContent = `
+                    @keyframes typing {
+                        0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+                        30% { transform: translateY(-5px); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
         });
     </script>
 </body>
