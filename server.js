@@ -2,7 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+
 const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 const http = require('http');
@@ -123,7 +124,8 @@ app.post('/api/register/patient', async (req, res) => {
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ success: false, message: 'Email exists' });
     
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : await bcrypt.hash('temp123', 10);
+    const hashedPassword = bcrypt.hashSync(password || 'temp123', 10);
+
     const userId = generateUniqueId('PAT');
     await new User({ userId, name, email, password: hashedPassword, dateOfBirth, bloodGroup, emergencyContact, address, registeredBy: registeredBy || 'self' }).save();
     res.status(201).json({ success: true, userId, name });
