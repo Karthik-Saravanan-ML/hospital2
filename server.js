@@ -12,9 +12,36 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*", methods: ['GET', 'POST'] } });
+// CORS Configuration for Production
+const allowedOrigins = [
+  'https://medical-system0.netlify.app',
+  'http://localhost:5500',
+  'http://localhost:3000',
+  'http://127.0.0.1:5500'
+];
 
-app.use(cors());
+const corsOptions = {
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+const io = new Server(server, { 
+  cors: { 
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
+  } 
+});
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use((req, res, next) => { console.log(`${req.method} ${req.path}`); next(); });
 
