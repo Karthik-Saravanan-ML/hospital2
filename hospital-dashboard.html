@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -688,16 +689,17 @@
             margin-right: 6px;
         }
 
-        /* BLOOD BANK - Improved Design */
+        /* BLOOD BANK - IMPROVED DESIGN */
         .blood-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 28px;
+            margin-top: 20px;
         }
 
         .blood-card {
             background: var(--card-bg);
-            padding: 32px;
+            padding: 32px 28px;
             border-radius: 16px;
             text-align: center;
             border: 2px solid var(--input-border);
@@ -705,6 +707,9 @@
             box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .blood-card:hover {
@@ -714,64 +719,190 @@
 
         .blood-card.critical {
             border-color: var(--danger);
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            background: linear-gradient(135deg, rgba(254, 226, 226, 0.8), rgba(254, 202, 202, 0.6));
             animation: pulse 2s infinite;
         }
 
         [data-theme="dark"] .blood-card.critical {
-            background: linear-gradient(135deg, #450a0a, #7f1d1d);
+            background: linear-gradient(135deg, rgba(69, 10, 10, 0.8), rgba(127, 29, 29, 0.6));
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translateY(0) scale(1); box-shadow: var(--shadow); }
-            50% { transform: translateY(-4px) scale(1.02); box-shadow: 0 15px 30px rgba(239, 68, 68, 0.25); }
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                box-shadow: var(--shadow); 
+                border-color: var(--danger);
+            }
+            50% { 
+                transform: translateY(-4px) scale(1.02); 
+                box-shadow: 0 15px 30px rgba(239, 68, 68, 0.3);
+                border-color: #fca5a5;
+            }
+        }
+
+        .blood-header {
+            margin-bottom: 24px;
         }
 
         .blood-type {
-            font-size: 36px;
+            font-size: 42px;
             font-weight: 800;
             color: var(--primary);
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .blood-units {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             margin-bottom: 8px;
             color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .blood-label {
-            font-size: 14px;
+        .blood-units .unit-label {
+            font-size: 16px;
             color: var(--text-light);
-            margin-bottom: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .blood-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
             font-weight: 600;
+            margin-bottom: 32px;
+        }
+
+        .blood-status.available {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .blood-status.critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            animation: pulse 2s infinite;
         }
 
         .blood-controls {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: auto;
         }
 
-        .blood-input-wrapper {
-            position: relative;
+        .blood-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .blood-control-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .blood-input-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
         }
 
         .blood-input {
-            width: 100px;
-            padding: 12px;
+            flex: 1;
+            padding: 14px 16px;
             text-align: center;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 10px;
+            font-size: 16px;
+            border: 2px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text);
+            transition: all 0.3s ease;
         }
 
         .blood-input:focus {
-            width: 120px;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            outline: none;
+        }
+
+        .blood-btn {
+            min-width: 50px;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .blood-btn.add {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+
+        .blood-btn.add:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .blood-btn.remove {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+
+        .blood-btn.remove:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .blood-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--input-border);
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* MODAL - Improved Design */
@@ -945,6 +1076,10 @@
                 width: calc(100% - 260px);
                 padding: 28px;
             }
+            
+            .blood-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
         }
 
         @media (max-width: 900px) {
@@ -1025,19 +1160,18 @@
             .modal-content {
                 padding: 32px 24px;
             }
+            
+            .blood-controls {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .blood-input-group {
+                width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
-            .blood-controls {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .blood-input {
-                width: 100%;
-                max-width: 200px;
-            }
-            
             .btn {
                 padding: 14px 24px;
                 font-size: 15px;
@@ -1049,6 +1183,18 @@
             
             .sidebar {
                 width: 280px;
+            }
+            
+            .blood-type {
+                font-size: 36px;
+            }
+            
+            .blood-units {
+                font-size: 32px;
+            }
+            
+            .blood-control-group {
+                width: 100%;
             }
         }
 
@@ -1758,7 +1904,7 @@
             }
         }
 
-        // Blood Bank Management
+        // Blood Bank Management - IMPROVED UI
         async function loadBloodBank() {
             const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
             const grid = document.getElementById('bloodGrid');
@@ -1778,23 +1924,57 @@
                     
                     return `
                         <div class="blood-card ${critical ? 'critical' : ''}">
-                            <div class="blood-type">${type}</div>
-                            <div class="blood-units">${units} <span style="font-size: 16px; color: var(--text-light);">units</span></div>
-                            <div class="blood-label">
-                                ${critical ? '<i class="fas fa-exclamation-circle"></i> Critical Stock' : '<i class="fas fa-check-circle"></i> Available'}
-                            </div>
-                            <div class="d-flex align-center justify-between mt-6">
-                                <div class="d-flex align-center gap-3">
-                                    <input type="number" class="blood-input" id="add-${type}" placeholder="Add" min="1">
-                                    <button class="btn btn-success btn-small" onclick="addBlood('${type}')">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
+                            <div class="blood-header">
+                                <div class="blood-type">${type}</div>
+                                <div class="blood-units">
+                                    ${units} <span class="unit-label">units</span>
                                 </div>
-                                <div class="d-flex align-center gap-3">
-                                    <input type="number" class="blood-input" id="remove-${type}" placeholder="Remove" min="1">
-                                    <button class="btn btn-danger btn-small" onclick="removeBlood('${type}')">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
+                                <div class="blood-status ${critical ? 'critical' : 'available'}">
+                                    <i class="fas fa-${critical ? 'exclamation-circle' : 'check-circle'}"></i>
+                                    ${critical ? 'Critical Stock' : 'Available'}
+                                </div>
+                            </div>
+                            
+                            <div class="blood-controls">
+                                <div class="blood-control-group">
+                                    <div class="blood-control-label">
+                                        <i class="fas fa-plus-circle" style="color: var(--success);"></i>
+                                        Add Units
+                                    </div>
+                                    <div class="blood-input-group">
+                                        <input type="number" class="blood-input" id="add-${type}" placeholder="0" min="1" max="100">
+                                        <button class="blood-btn add" onclick="addBlood('${type}')" title="Add units">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="blood-control-group">
+                                    <div class="blood-control-label">
+                                        <i class="fas fa-minus-circle" style="color: var(--danger);"></i>
+                                        Remove Units
+                                    </div>
+                                    <div class="blood-input-group">
+                                        <input type="number" class="blood-input" id="remove-${type}" placeholder="0" min="1" max="${units}">
+                                        <button class="blood-btn remove" onclick="removeBlood('${type}')" title="Remove units">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="blood-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${units}</div>
+                                    <div class="stat-label">Current</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: ${critical ? 'var(--danger)' : 'var(--success)'}">${critical ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-check"></i>'}</div>
+                                    <div class="stat-label">Status</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">10</div>
+                                    <div class="stat-label">Threshold</div>
                                 </div>
                             </div>
                         </div>
@@ -1806,40 +1986,64 @@
         }
 
         async function addBlood(type) {
-            const units = parseInt(document.getElementById(`add-${type}`).value);
-            if (!units || units <= 0) return alert('Enter valid units to add');
+            const input = document.getElementById(`add-${type}`);
+            const units = parseInt(input.value);
+            if (!units || units <= 0) {
+                alert('Please enter valid units to add');
+                input.focus();
+                return;
+            }
             
             try {
                 const token = localStorage.getItem('token');
                 await fetch(`${API_URL}/blood/add`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ hospitalId: hospitalData.hospitalId, hospitalName: hospitalData.hospitalName, bloodType: type, units })
+                    body: JSON.stringify({ 
+                        hospitalId: hospitalData.hospitalId, 
+                        hospitalName: hospitalData.hospitalName, 
+                        bloodType: type, 
+                        units 
+                    })
                 });
-                document.getElementById(`add-${type}`).value = '';
+                input.value = '';
                 loadBloodBank();
             } catch (error) {
-                alert('Error adding blood');
+                alert('Error adding blood units');
             }
         }
 
         async function removeBlood(type) {
-            const units = parseInt(document.getElementById(`remove-${type}`).value);
-            if (!units || units <= 0) return alert('Enter valid units to remove');
+            const input = document.getElementById(`remove-${type}`);
+            const units = parseInt(input.value);
+            
+            if (!units || units <= 0) {
+                alert('Please enter valid units to remove');
+                input.focus();
+                return;
+            }
             
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_URL}/blood/remove`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ hospitalId: hospitalData.hospitalId, hospitalName: hospitalData.hospitalName, bloodType: type, units })
+                    body: JSON.stringify({ 
+                        hospitalId: hospitalData.hospitalId, 
+                        hospitalName: hospitalData.hospitalName, 
+                        bloodType: type, 
+                        units 
+                    })
                 });
                 const result = await response.json();
-                if (!result.success) return alert(result.message);
-                document.getElementById(`remove-${type}`).value = '';
+                if (!result.success) {
+                    alert(result.message);
+                    return;
+                }
+                input.value = '';
                 loadBloodBank();
             } catch (error) {
-                alert('Error removing blood');
+                alert('Error removing blood units');
             }
         }
 
@@ -2091,3 +2295,4 @@
     </script>
 </body>
 </html>
+[file content end]
