@@ -620,7 +620,7 @@ app.get('/api/test-ai', async (req, res) => {
       status: error.response?.status,
       troubleshooting: {
         apiKey: GOOGLE_AI_API_KEY ? 'Set (check if valid)' : 'Not set',
-        workingEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+        workingEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
         workingModel: 'gemini-pro',
         note: 'gemini-pro is the stable, working model',
         suggestions: [
