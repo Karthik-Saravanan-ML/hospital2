@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 // CORS Configuration for Production
 const allowedOrigins = [
-  'https://medical-system0.netlify.app',
+  'https://medicalsystem7.netlify.app',
   'http://localhost:5500',
   'http://localhost:3000',
   'http://127.0.0.1:5500'
